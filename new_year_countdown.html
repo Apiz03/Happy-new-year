@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Countdown Tahun Baru</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: radial-gradient(circle at bottom, #0b1026, #000);
+        font-family: "Segoe UI", Arial, sans-serif;
+      }
+
+      canvas {
+        display: block;
+      }
+
+      .center {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: white;
+        z-index: 10;
+      }
+
+      .countdown {
+        font-size: 6rem;
+        font-weight: bold;
+        text-shadow: 0 0 25px rgba(255, 255, 255, 0.9);
+        animation: pulse 1s infinite;
+      }
+
+      .greeting {
+        display: none;
+        animation: fadeIn 3s ease forwards;
+      }
+
+      .greeting h1 {
+        font-size: 4rem;
+        margin: 0;
+        text-shadow: 0 0 30px rgba(255, 255, 255, 0.9);
+      }
+
+      .greeting p {
+        font-size: 1.6rem;
+        margin-top: 10px;
+        opacity: 0.9;
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.15);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.8);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="fireworks"></canvas>
+
+    <div class="center">
+      <div id="countdown" class="countdown">10</div>
+
+      <div id="greeting" class="greeting">
+        <h1>🎆 Selamat Tahun Baru 2026 🎆</h1>
+        <p>Semoga penuh harapan, kesehatan, dan kesuksesan</p>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("fireworks");
+      const ctx = canvas.getContext("2d");
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      window.addEventListener("resize", () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+
+      let particles = [];
+      let fireworksActive = false;
+
+      class Particle {
+        constructor(x, y, color) {
+          this.x = x;
+          this.y = y;
+          this.color = color;
+          this.radius = Math.random() * 2 + 1;
+          this.vx = (Math.random() - 0.5) * 7;
+          this.vy = (Math.random() - 0.5) * 7;
+          this.life = 100;
+        }
+
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.life--;
+        }
+
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = this.color;
+          ctx.fill();
+        }
+      }
+
+      function createFirework() {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height * 0.5;
+        const colors = ["#ff0043", "#14fc56", "#1e90ff", "#f7ff00", "#ff7f00"];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+
+        for (let i = 0; i < 90; i++) {
+          particles.push(new Particle(x, y, color));
+        }
+      }
+
+      function animate() {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.25)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        particles.forEach((p, i) => {
+          p.update();
+          p.draw();
+          if (p.life <= 0) particles.splice(i, 1);
+        });
+
+        if (fireworksActive && Math.random() < 0.05) {
+          createFirework();
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+
+      let timeLeft = 10;
+      const countdownEl = document.getElementById("countdown");
+      const greetingEl = document.getElementById("greeting");
+
+      const countdownTimer = setInterval(() => {
+        timeLeft--;
+        countdownEl.textContent = timeLeft;
+
+        if (timeLeft === 0) {
+          clearInterval(countdownTimer);
+
+          countdownEl.style.display = "none";
+          greetingEl.style.display = "block";
+
+          fireworksActive = true;
+          setInterval(createFirework, 600);
+        }
+      }, 1000);
+    </script>
+  </body>
+</html>
